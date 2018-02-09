@@ -1,0 +1,9 @@
+{
+  "hash": true,
+  "entry": {
+    "index": "./src/entry.js"
+  },
+  "extraBabelPlugins": [
+    ["import", { "libraryName": "antd", "style": true }]
+  ]
+}
