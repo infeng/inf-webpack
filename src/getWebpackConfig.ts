@@ -5,6 +5,7 @@ import path from 'path';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin';
 import webpack from 'webpack';
+import htmlWebpackPlugin from 'html-webpack-plugin';
 
 interface Option {
   entry?: string;
@@ -12,6 +13,9 @@ interface Option {
   hash?: boolean;
   extraBabelPresets?: any[];
   extraBabelPlugins?: any[];
+  htmlPath?: string;
+  outputPath?: string;
+  publicPath?: string;
 }
 
 export default function getWebpackConfig(opts: Option) {  
@@ -152,17 +156,27 @@ export default function getWebpackConfig(opts: Option) {
     cssFilename = '[name].[contenthash:8].css';
   }
 
+  const entry = [
+    opts.entry,
+  ];
+
+  if (isDev) {
+    entry.unshift(
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+    );
+  }
+
   const config = {
-    entry: opts.entry,
+    entry: entry,
     devtool: isDev ? 'eval-source-map' : '',
     output: {
-      path: path.resolve(opts.cwd, './dist/'),
+      path: path.resolve(opts.cwd, opts.outputPath || './dist/'),
       filename: jsFilename,
-      publicPath: '/',
+      publicPath: opts.publicPath || '/',
       chunkFilename: jsFilename,
     },
     resolve: {
-      modules: ['node_modules', path.join(opts.cwd, '../node_modules')],
+      modules: ['node_modules', path.join(opts.cwd, 'node_modules')],
       extensions: ['.ts', 'tsx', '.js', '.jsx', '.json'],
     },
     module: {
@@ -263,7 +277,11 @@ export default function getWebpackConfig(opts: Option) {
       ]},
       plugins: [
         new CaseSensitivePathsPlugin(),
-        new webpack.NoEmitOnErrorsPlugin(),        
+        new webpack.NoEmitOnErrorsPlugin(),
+        new htmlWebpackPlugin({
+          inject: true,
+          template: path.join(opts.cwd, opts.htmlPath),
+        }),        
         ...(isDev ? [
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),

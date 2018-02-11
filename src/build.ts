@@ -6,25 +6,18 @@ import stripJsonComments from 'strip-json-comments';
 import { readFileSync, existsSync } from 'fs';
 import assert from 'assert';
 import defaultBabelOptions from './defaultConfigs/babel';
-
-function getRcConfig(rcFile) {
-  return JSON.parse(stripJsonComments(readFileSync(rcFile, 'utf-8')));
-}
+import { getRcConfig } from './getConfig';
 
 export default function build(args) {
   const cwd = args.cwd;
 
   const webpackrcPath = path.resolve(args.cwd, args.config || '.webpackrc');
 
-  assert(existsSync(webpackrcPath), `can not find ${webpackrcPath}`);
-
   const webpackrc = getRcConfig(webpackrcPath);
 
   const webpackConfig = getWebpackConfig({
     cwd,
-    entry: webpackrc.entry,
-    extraBabelPresets: webpackrc.extraBabelPresets,
-    extraBabelPlugins: webpackrc.extraBabelPlugins,
+    ...webpackrc,
   });
 
   webpackConfig.plugins.push(
