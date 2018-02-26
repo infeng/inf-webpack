@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var chalk = require('chalk');
+
+program
+.parse(process.argv);
+
+if (program.args.indexOf('build') >= 0) {
+  require('../build')({
+    cwd: process.cwd(),
+  });
+}

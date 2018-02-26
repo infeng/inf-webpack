@@ -137,7 +137,7 @@ export default function getWebpackConfig(opts: Option) {
       return {
         test: rule.test,
         use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
+          fallback: require.resolve('style-loader'),
           use: rule.use.slice(1),
         }),
       };
@@ -177,7 +177,7 @@ export default function getWebpackConfig(opts: Option) {
     },
     resolve: {
       modules: ['node_modules', path.join(opts.cwd, 'node_modules')],
-      extensions: ['.ts', 'tsx', '.js', '.jsx', '.json'],
+      extensions: ['.js', '.jsx', '.ts', 'tsx', '.json'],
     },
     module: {
       rules: [
@@ -203,13 +203,14 @@ export default function getWebpackConfig(opts: Option) {
         },
         {
           test: /\.tsx?$/,
+          exclude: /node_modules/,
           use: [
             {
               loader: require.resolve('babel-loader'),
               options: deafultBabelConfig,
             },
             {
-              loader: require.resolve('ts-loader'),
+              loader: require.resolve('awesome-typescript-loader'),
               options: tsOptions,
             },
           ],
@@ -276,16 +277,18 @@ export default function getWebpackConfig(opts: Option) {
         },
       ]},
       plugins: [
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.optimize.ModuleConcatenationPlugin(),        
         new CaseSensitivePathsPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
-        new htmlWebpackPlugin({
+        ...(opts.htmlPath ? [new htmlWebpackPlugin({
           inject: true,
           template: path.join(opts.cwd, opts.htmlPath),
-        }),        
+        })] : []),        
         ...(isDev ? [
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-        }),        
+        }),
       ] : [
         new ExtractTextPlugin({
           filename: cssFilename,
