@@ -177,7 +177,7 @@ export default function getWebpackConfig(opts: Option) {
     },
     resolve: {
       modules: ['node_modules', path.join(opts.cwd, 'node_modules')],
-      extensions: ['.js', '.jsx', '.ts', 'tsx', '.json'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     },
     module: {
       rules: [
