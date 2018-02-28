@@ -10,4 +10,14 @@ if (program.args.indexOf('build') >= 0) {
   require('../build')({
     cwd: process.cwd(),
   });
+
+  return;
+}
+
+if (program.args.indexOf('dev') >= 0) {
+  require('../dev')({
+    cwd: process.cwd(),
+  });
+  
+  return;
 }

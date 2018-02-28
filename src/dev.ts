@@ -15,6 +15,7 @@ export default function dev(args) {
 
   const webpackConfig = getWebpackConfig({
     cwd,
+    dev: true,
     ...webpackrc,
   });
 

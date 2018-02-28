@@ -16,10 +16,11 @@ interface Option {
   htmlPath?: string;
   outputPath?: string;
   publicPath?: string;
+  dev?: boolean;
 }
 
 export default function getWebpackConfig(opts: Option) {  
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = opts.dev || process.env.NODE_ENV === 'development';
 
   const postcssOptions = {
     ident: 'postcss',
@@ -135,6 +136,7 @@ export default function getWebpackConfig(opts: Option) {
   if (!isDev) {
     cssRules = cssRules.map(rule => {
       return {
+        ...rule,
         test: rule.test,
         use: ExtractTextPlugin.extract({
           fallback: require.resolve('style-loader'),
@@ -142,7 +144,7 @@ export default function getWebpackConfig(opts: Option) {
         }),
       };
     });
-  }  
+  }
 
   const tsOptions = {
     transpileOnly: true,
@@ -166,6 +168,18 @@ export default function getWebpackConfig(opts: Option) {
     );
   }
 
+  const babelOptions = {
+    ...deafultBabelConfig,
+    presets: [
+      ...deafultBabelConfig.presets,
+      ...(opts.extraBabelPresets || []),
+    ],
+    plugins: [
+      ...deafultBabelConfig.plugins,
+      ...(opts.extraBabelPlugins || []),
+    ],
+  };
+
   const config = {
     entry: entry,
     devtool: isDev ? 'eval-source-map' : '',
@@ -187,17 +201,7 @@ export default function getWebpackConfig(opts: Option) {
           use: [
             {
               loader: require.resolve('babel-loader'),
-              options: {
-                ...deafultBabelConfig,
-                presets: [
-                  ...deafultBabelConfig.presets,
-                  ...(opts.extraBabelPresets || []),
-                ],
-                plugins: [
-                  ...deafultBabelConfig.plugins,
-                  ...(opts.extraBabelPlugins || []),
-                ],
-              },
+              options: babelOptions,
             },
           ],
         },
@@ -207,7 +211,7 @@ export default function getWebpackConfig(opts: Option) {
           use: [
             {
               loader: require.resolve('babel-loader'),
-              options: deafultBabelConfig,
+              options: babelOptions,
             },
             {
               loader: require.resolve('awesome-typescript-loader'),
