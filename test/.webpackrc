@@ -1,8 +1,0 @@
-{
-  "hash": true,
-  "entry": "./src/entry.js",
-  "extraBabelPlugins": [
-    ["import", { "libraryName": "antd", "style": true }]
-  ],
-  "htmlPath": "./index.html"
-}
