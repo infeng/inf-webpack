@@ -6,6 +6,7 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin';
 import webpack from 'webpack';
 import htmlWebpackPlugin from 'html-webpack-plugin';
+import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin';
 
 interface Option {
   entry?: string;
@@ -17,9 +18,14 @@ interface Option {
   outputPath?: string;
   publicPath?: string;
   dev?: boolean;
+  cssModules?: boolean;
 }
 
-export default function getWebpackConfig(opts: Option) {  
+export default function getWebpackConfig(opts: Option = {
+  hash: true,
+  dev: false,
+  cssModules: true,
+}) {  
   const isDev = opts.dev || process.env.NODE_ENV === 'development';
 
   const postcssOptions = {
@@ -33,10 +39,10 @@ export default function getWebpackConfig(opts: Option) {
     ],
   };
 
-  const cssModulesConfig = {
+  const cssModulesConfig = opts.cssModules ? {
     modules: true,
     localIdentName: '[local]___[hash:base64:5]',
-  };
+  } : {};
 
   const cssOptions = {
     sourceMap: false,
@@ -162,12 +168,6 @@ export default function getWebpackConfig(opts: Option) {
     opts.entry,
   ];
 
-  if (isDev) {
-    entry.unshift(
-      require.resolve('react-dev-utils/webpackHotDevClient'),
-    );
-  }
-
   const babelOptions = {
     ...deafultBabelConfig,
     presets: [
@@ -182,13 +182,13 @@ export default function getWebpackConfig(opts: Option) {
 
   const config = {
     entry: entry,
-    devtool: isDev ? 'eval-source-map' : '',
+    devtool: isDev ? 'cheap-module-source-map' : '',
     output: {
       path: path.resolve(opts.cwd, opts.outputPath || './dist/'),
       filename: jsFilename,
       publicPath: opts.publicPath || '/',
       chunkFilename: jsFilename,
-    },
+    },  
     resolve: {
       modules: ['node_modules', path.join(opts.cwd, 'node_modules')],
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
@@ -290,6 +290,9 @@ export default function getWebpackConfig(opts: Option) {
           template: path.join(opts.cwd, opts.htmlPath),
         })] : []),        
         ...(isDev ? [
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        new WatchMissingNodeModulesPlugin(path.join(opts.cwd, 'node_modules')),          
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
         }),
