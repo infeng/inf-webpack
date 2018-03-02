@@ -21,11 +21,14 @@ interface Option {
   cssModules?: boolean;
 }
 
-export default function getWebpackConfig(opts: Option = {
-  hash: true,
-  dev: false,
-  cssModules: true,
-}) {  
+export default function getWebpackConfig(opts: Option) {
+  opts = {
+    hash: true,
+    dev: false,
+    cssModules: true,
+    ...opts,
+  };
+
   const isDev = opts.dev || process.env.NODE_ENV === 'development';
 
   const postcssOptions = {
