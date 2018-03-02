@@ -9,7 +9,7 @@ import htmlWebpackPlugin from 'html-webpack-plugin';
 import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin';
 
 interface Option {
-  entry?: string;
+  entry?: any;
   cwd?: string;
   hash?: boolean;
   extraBabelPresets?: any[];
@@ -19,6 +19,7 @@ interface Option {
   publicPath?: string;
   dev?: boolean;
   cssModules?: boolean;
+  commons?: any[];
 }
 
 export default function getWebpackConfig(opts: Option) {
@@ -162,14 +163,12 @@ export default function getWebpackConfig(opts: Option) {
   let jsFilename = '[name].js';
   let cssFilename = '[name].css';
 
-  if (!isDev && !opts.hash) {
+  if (!isDev && opts.hash) {
     jsFilename = '[name].[chunkhash:8].js';
     cssFilename = '[name].[contenthash:8].css';
   }
 
-  const entry = [
-    opts.entry,
-  ];
+  const entry = opts.entry;
 
   const babelOptions = {
     ...deafultBabelConfig,
@@ -182,6 +181,10 @@ export default function getWebpackConfig(opts: Option) {
       ...(opts.extraBabelPlugins || []),
     ],
   };
+
+  const commonsPlugins = (opts.commons || []).map(common => {
+    return new webpack.optimize.CommonsChunkPlugin(common);
+  });  
 
   const config = {
     entry: entry,
@@ -288,6 +291,11 @@ export default function getWebpackConfig(opts: Option) {
         new webpack.optimize.ModuleConcatenationPlugin(),        
         new CaseSensitivePathsPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
+        new webpack.optimize.CommonsChunkPlugin({
+          name: 'vendor',
+          filename: jsFilename,
+        }),
+        ...commonsPlugins, 
         ...(opts.htmlPath ? [new htmlWebpackPlugin({
           inject: true,
           template: path.join(opts.cwd, opts.htmlPath),

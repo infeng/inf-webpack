@@ -9,6 +9,25 @@ import { createCompiler } from 'react-dev-utils/WebpackDevServerUtils';
 import fs from 'fs';
 import errorOverlayMiddleware from 'react-dev-utils/errorOverlayMiddleware';
 import noopServiceWorkerMiddleware from 'react-dev-utils/noopServiceWorkerMiddleware';
+import { isArray } from 'util';
+
+function addServerEntrypoints(appEntry) {
+  let newEntry = null;
+  if (typeof appEntry === 'string') {
+    newEntry = [
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+      appEntry,
+    ];
+  }
+  if (isArray(appEntry)) {
+    newEntry = [
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+      ...appEntry
+    ];
+  }
+
+  return newEntry;
+}
 
 export default function dev(args) {
   const cwd = args.cwd;
@@ -23,10 +42,19 @@ export default function dev(args) {
     ...webpackrc,
   });
 
-  webpackConfig.entry = [
-    require.resolve('react-dev-utils/webpackHotDevClient'),
-    ...webpackConfig.entry,
-  ];
+  if (typeof webpackConfig.entry === 'string') {
+    webpackConfig.entry = addServerEntrypoints(webpackConfig.entry);
+  }
+
+  if (typeof webpackConfig.entry === 'object' && !isArray(webpackConfig.entry)) {
+    const entryKeys = Object.keys(webpackConfig.entry);
+    const appEntryKey = entryKeys[entryKeys.length - 1];
+    const appEntry = webpackConfig.entry[appEntryKey];
+    const newAppEntry = addServerEntrypoints(appEntry);
+    webpackConfig.entry[appEntryKey] = newAppEntry;
+  }else {
+    webpackConfig.entry = addServerEntrypoints(webpackConfig.entry);
+  }
 
   const port = webpackrc.port || 8000;
 
@@ -67,7 +95,8 @@ export default function dev(args) {
     const urls = prepareUrls('http', host, port,);
     const useYarn = fs.existsSync(path.join(cwd, '.yarnLockFile'));
     const appName = require(path.join(cwd, 'package.json')).name;
-    const compiler = createCompiler(webpack, webpackConfig, appName, urls, useYarn);
+    // const compiler = createCompiler(webpack, webpackConfig, appName, urls, useYarn);
+    const compiler = webpack(webpackConfig);
     const server = new webpackDevServer(compiler, serverConfig);
 
     server.listen(port, host, err => {
