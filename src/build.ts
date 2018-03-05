@@ -7,11 +7,12 @@ import { readFileSync, existsSync } from 'fs';
 import assert from 'assert';
 import defaultBabelOptions from './defaultConfigs/babel';
 import { getRcConfig } from './getConfig';
+import constants from './constants';
 
 export default function build(args, cb) {
   const cwd = args.cwd;
 
-  const webpackrcPath = path.resolve(args.cwd, args.config || '.webpackrc');
+  const webpackrcPath = path.resolve(args.cwd, args.config || constants.CONFIG_NAME);
 
   const webpackrc = getRcConfig(webpackrcPath);
 

@@ -10,6 +10,7 @@ import fs from 'fs';
 import errorOverlayMiddleware from 'react-dev-utils/errorOverlayMiddleware';
 import noopServiceWorkerMiddleware from 'react-dev-utils/noopServiceWorkerMiddleware';
 import { isArray } from 'util';
+import constants from './constants';
 
 function addServerEntrypoints(appEntry) {
   let newEntry = null;
@@ -32,7 +33,7 @@ function addServerEntrypoints(appEntry) {
 export default function dev(args) {
   const cwd = args.cwd;
 
-  const webpackrcPath = path.resolve(args.cwd, args.config || '.webpackrc');
+  const webpackrcPath = path.resolve(args.cwd, args.config || constants.CONFIG_NAME);
 
   const webpackrc = getRcConfig(webpackrcPath);
 

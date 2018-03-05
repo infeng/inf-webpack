@@ -5,5 +5,5 @@ import assert from 'assert';
 export function getRcConfig(rcFile) {
   assert(existsSync(rcFile), `can not find ${rcFile}`);
 
-  return JSON.parse(stripJsonComments(readFileSync(rcFile, 'utf-8')));
+  return require(rcFile);
 }
