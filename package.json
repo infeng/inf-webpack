@@ -5,6 +5,7 @@
   "main": "getWebpackConfig.js",
   "scripts": {
     "start": "export NODE_ENV=development && cd test && node index.js",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
