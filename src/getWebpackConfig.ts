@@ -20,6 +20,7 @@ interface Option {
   dev?: boolean;
   cssModules?: boolean;
   commons?: any[];
+  defineObj: any;
 }
 
 export default function getWebpackConfig(opts: Option) {
@@ -325,6 +326,7 @@ export default function getWebpackConfig(opts: Option) {
         }),
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
+          ...(opts.defineObj || {}),
         }),        
       ])],
   };
